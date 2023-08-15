@@ -27,14 +27,9 @@ class CaixaDaLanchonete {
       // verifica se existem itens extras sem item principal
       if (
         itemDoCardapio.descricao.includes("extra") &&
-        !nomesDosItensNoCarrinho.includes(
-          itemDoCardapio.descricao
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .split(/[() ]+/)[3]
-        )
-      ) {
+        !verificaExtrasSemPrincipal(nomesDosItensNoCarrinho, itemDoCardapio)
+        
+        ) {
         return "Item extra não pode ser pedido sem o principal";
       }
 
@@ -60,6 +55,24 @@ class CaixaDaLanchonete {
   }
 }
 
+function verificaExtrasSemPrincipal (nomesDosItensNoCarrinho, itemDoCardapio){
+  let indexInicio = itemDoCardapio.descricao.indexOf("(")
+  let indexFim = itemDoCardapio.descricao.indexOf(")")
+
+  if(nomesDosItensNoCarrinho.includes(
+    itemDoCardapio.descricao
+    .slice(indexInicio+1, indexFim)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .split(/[() ]+/)
+    .filter(item => cardapio.map(i => i.codigo).includes(item)).join('')
+  )) {
+    return true
+  }
+  return false
+}
+
 const formasDePagamento = { dinheiro: -0.05, debito: 0, credito: 0.03 };
 
 const cardapio = [
@@ -72,5 +85,7 @@ const cardapio = [
   { codigo: "combo1", descricao: "1 Suco e 1 Sanduíche", valor: 9.5 },
   { codigo: "combo2", descricao: "1 Café e 1 Sanduíche", valor: 7.5 },
 ];
+
+console.log(new CaixaDaLanchonete().calcularValorDaCompra('credito', ['cafe,1', 'sanduiche,1', 'queijo,1']))
 
 export { CaixaDaLanchonete };
